@@ -1,0 +1,4 @@
+REQ_URL=http://openapi.foodsafetykorea.go.kr/api
+KEY_ID=891ac565f2f34c359279
+SERVICE_ID=COOKRCP01
+DATA_TYPE=json
