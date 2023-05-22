@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+
+    <persistence-unit name="persistence" transaction-type="RESOURCE_LOCAL">
+
+        <class>persistence.entity.Recipe</class>
+        <class>persistence.entity.Ingredient</class>
+        <class>persistence.entity.RcpPart</class>
+        <class>persistence.entity.Cooked</class>
+        <class>persistence.entity.Refrigerator</class>
+        <class>persistence.entity.User</class>
+
+        <properties>
+            <!-- 필수 속성 시작 -->
+            <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
+            <property name="javax.persistence.jdbc.user" value="root"/>
+            <property name="javax.persistence.jdbc.password" value="eoghks0014"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost/creative_project"/>
+
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
+            <!-- 필수 속성 끝 -->
+
+            <!-- 애플리케이션이 실행되면서 데이터베이스에 테이블 자동 생성 -->
+            <!-- create, update, validate, create-drop, none -->
+            <!-- <property name="hibernate.hbm2ddl.auto" value="create"/> -->
+
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+
+            <!-- snake to camel -->
+            <property name="hibernate.physical_naming_strategy" value="org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy" />
+
+        </properties>
+    </persistence-unit>
+</persistence>

@@ -1,9 +1,15 @@
-import updater.Recipe;
+import updater.Updater;
 
 public class main {
-    public static void main(String[] args) throws Exception {
-        System.out.println(Integer.valueOf("hello03"));
+    static class CustomInteger {
+        int value;
+        public CustomInteger(int value) {
+            this.value = value;
+        }
+    }
 
-        Recipe f = Recipe.builder().rcpNm("소갈비찜").build();
+    public static void main(String[] args) throws Exception {
+        Updater updater = new Updater();
+        updater.run();
     }
 }
