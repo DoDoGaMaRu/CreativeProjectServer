@@ -39,7 +39,7 @@ public class Updater implements Runnable{
         // TODO 리팩터링
         // String reqUrl = "http://openapi.foodsafetykorea.go.kr/api/891ac565f2f34c359279/COOKRCP01/json/"+start+"/"+end;
         // String jsonStr = Request.httpRequest(reqUrl);
-        String fileName = "temp/sample1000.json";
+        String fileName = "domainObjects/sample1000.json";
         String jsonStr = readSample(fileName);
 
         JSONObject jsonObj = JsonUtil.convertJsonObj(jsonStr);

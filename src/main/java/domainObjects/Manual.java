@@ -1,4 +1,4 @@
-package temp;
+package domainObjects;
 
 import lombok.Getter;
 import lombok.Setter;
