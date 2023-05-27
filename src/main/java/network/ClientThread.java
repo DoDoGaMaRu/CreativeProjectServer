@@ -1,10 +1,7 @@
 package network;
 
-import api._ingredient;
-import api._recipe;
-import api._refrigerator;
-import api._user;
-import network.Exeptions.BadRequestException;
+import api.*;
+import network.Exeptions.*;
 import network.protocol.*;
 import util.NameFormat;
 
@@ -90,21 +87,21 @@ class ClientThread extends Thread {
         String codeL1Name = "", codeL2Name = "", typeName = "";
         String className =  "", methodName = "";
         for (Field f : types) {
-            String fname = f.getName();
+            String fName = f.getName();
             byte fVal = (byte) f.get(RequestCode.class);
             if (type == fVal) {
-                typeName = fname;
+                typeName = fName;
             }
         }
         for (Field f : codes) {
-            String fname = f.getName();
+            String fName = f.getName();
             byte fVal = (byte) f.get(RequestCode.class);
 
             if (codeL1 == fVal) {
-                codeL1Name = fname;
+                codeL1Name = fName;
             }
             if (codeL2 == fVal) {
-                codeL2Name = fname;
+                codeL2Name = fName;
             }
         }
 
