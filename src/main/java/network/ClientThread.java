@@ -18,14 +18,8 @@ class ClientThread extends Thread {
     private DataInputStream dis;
     private DataOutputStream dos;
 
-    private InputStream is;
-    private OutputStream os;
-
     private ObjectInputStream ois;
     private ObjectOutputStream oos;
-
-    private final int BUF_SIZE = 1024;
-    private byte[] readBuf = new byte[BUF_SIZE];
 
     private int threadId;
 
@@ -126,6 +120,6 @@ class ClientThread extends Thread {
                 }
             }
         }
-        throw new BadRequestException(); // TODO BadRequest 예외 날리기
+        throw new BadRequestException();
     }
 }
