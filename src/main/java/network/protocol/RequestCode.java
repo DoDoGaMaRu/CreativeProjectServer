@@ -25,6 +25,9 @@ public class RequestCode {
     // REFRIGERATOR
     public static final byte PUT_IN = REFRIGERATOR | 1 << L2;
     public static final byte PUT_OUT = REFRIGERATOR | 2 << L2;
+
+    //public static final byte READ = REFRIGERATOR | 3 << L2;
+
     // INGREDIENT
     public static final byte SEARCH = INGREDIENT | 1 << L2;
     // RECIPE

@@ -34,4 +34,19 @@ public class RcpPartDAO extends DAO<RcpPart> {
     public RcpPart update(RcpPart rcpPart) {
         return (RcpPart) execQuery(em -> em.merge(rcpPart));
     }
+
+    public Long count() {
+        return (Long) execQuery(em -> {
+            Query query = em.createQuery("SELECT COUNT(DISTINCT r.recipe.id) FROM RcpPart r");
+            return (Long) query.getSingleResult();
+        });
+    }
+
+    public List<RcpPart> selectAllByRcpId(Long recipeId) {
+        return (List<RcpPart>) execQuery(em -> {
+            Query query = em.createQuery("SELECT r FROM RcpPart r WHERE r.recipe.id = :recipeId");
+            query.setParameter("recipeId", recipeId);
+            return query.getResultList();
+        });
+    }
 }
