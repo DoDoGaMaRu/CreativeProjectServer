@@ -23,6 +23,15 @@ public class RefrigeratorDAO extends DAO<Refrigerator> {
         });
     }
 
+
+    public List<Refrigerator> selectAllBySerial(Long serial) {
+        return (List<Refrigerator>) execQuery(em -> {
+            Query query = em.createQuery("SELECT r FROM Refrigerator r WHERE r.serial = :serial");
+            query.setParameter("serial", serial);
+            return query.getResultList();
+        });
+    }
+
     public void delete(Long id) {
         execQuery(em -> {
             Refrigerator target =  em.find(Refrigerator.class, id);

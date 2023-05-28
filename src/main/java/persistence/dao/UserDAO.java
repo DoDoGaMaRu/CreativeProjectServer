@@ -12,8 +12,12 @@ public class UserDAO extends DAO<User> {
         });
     }
 
-    public User selectById(Long id) {
-        return (User) execQuery(em -> em.find(User.class, id));
+    public User selectBySerial(Long serial) {
+        return (User) execQuery(em -> em.find(User.class, serial));
+    }
+
+    public User selectByColumn(Object column) {
+        return (User) execQuery(em -> em.find(User.class, column));
     }
 
     public List<User> selectAll() {
@@ -23,9 +27,9 @@ public class UserDAO extends DAO<User> {
         });
     }
 
-    public void delete(Long id) {
+    public void delete(Long serial) {
         execQuery(em -> {
-            User target =  em.find(User.class, id);
+            User target =  em.find(User.class, serial);
             em.remove(target);
             return null;
         });
