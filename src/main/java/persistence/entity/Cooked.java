@@ -3,7 +3,9 @@ package persistence.entity;
 import lombok.*;
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -20,5 +22,5 @@ public class Cooked {
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
-    private LocalDate date;
+    private LocalDateTime regdate;
 }

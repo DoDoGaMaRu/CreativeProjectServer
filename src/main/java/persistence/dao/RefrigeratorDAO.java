@@ -1,46 +1,31 @@
 package persistence.dao;
 
 import persistence.entity.*;
-import javax.persistence.*;
-import java.util.*;
 
-public class RefrigeratorDAO extends DAO<Refrigerator> {
-    public Refrigerator insert(Refrigerator refrigerator) {
-        return (Refrigerator) execQuery(em -> {
-            em.persist(refrigerator);
-            return refrigerator;
-        });
+import javax.persistence.Query;
+import java.util.List;
+
+public class RefrigeratorDAO extends DAO<Refrigerator, Long> {
+    private static RefrigeratorDAO refrigeratorDAO;
+
+    public static RefrigeratorDAO getInstance() {
+        if (refrigeratorDAO == null) {
+            refrigeratorDAO = new RefrigeratorDAO();
+        }
+        return refrigeratorDAO;
     }
 
-    public Refrigerator selectById(Long id) {
-        return (Refrigerator) execQuery(em -> em.find(Refrigerator.class, id));
+    private RefrigeratorDAO() {
+        super(Refrigerator.class);
     }
 
-    public List<Refrigerator> selectAll() {
+    public List<Refrigerator> ascFindAllBy(String column, Object value, int firstResult, int maxResult) {
         return (List<Refrigerator>) execQuery(em -> {
-            Query query = em.createQuery("SELECT r FROM Refrigerator r");
+            Query query = em.createQuery("SELECT t FROM "+ entityClass.getSimpleName() +" t WHERE t."+column+"=:"+column+" ORDER BY t.exprt_date")
+                    .setParameter(column, value)
+                    .setFirstResult(firstResult)
+                    .setMaxResults(maxResult);
             return query.getResultList();
         });
-    }
-
-
-    public List<Refrigerator> selectAllBySerial(Long serial) {
-        return (List<Refrigerator>) execQuery(em -> {
-            Query query = em.createQuery("SELECT r FROM Refrigerator r WHERE r.serial = :serial");
-            query.setParameter("serial", serial);
-            return query.getResultList();
-        });
-    }
-
-    public void delete(Long id) {
-        execQuery(em -> {
-            Refrigerator target =  em.find(Refrigerator.class, id);
-            em.remove(target);
-            return null;
-        });
-    }
-
-    public Refrigerator update(Refrigerator refrigerator) {
-        return (Refrigerator) execQuery(em -> em.merge(refrigerator));
     }
 }

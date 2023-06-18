@@ -20,6 +20,7 @@ import persistence.entity.Recipe;
 import util.BuilderUtil;
 import util.JsonUtil;
 import util.NameFormat;
+import util.Request;
 
 
 /**
@@ -34,13 +35,13 @@ public class Updater implements Runnable{
 
     @Override
     public void run() {
-        int start = 1;
-        int end = 1000;
+        int start = 1001;
+        int end = 2000;
         // TODO 리팩터링
-        // String reqUrl = "http://openapi.foodsafetykorea.go.kr/api/891ac565f2f34c359279/COOKRCP01/json/"+start+"/"+end;
-        // String jsonStr = Request.httpRequest(reqUrl);
-        String fileName = "domainObjects/sample1000.json";
-        String jsonStr = readSample(fileName);
+        String reqUrl = "http://openapi.foodsafetykorea.go.kr/api/891ac565f2f34c359279/COOKRCP01/json/"+start+"/"+end;
+        String jsonStr = Request.httpRequest(reqUrl);
+//         String fileName = "sample/sample1000.json";
+//         String jsonStr = readSample(fileName);
 
         JSONObject jsonObj = JsonUtil.convertJsonObj(jsonStr);
         JSONArray recipeJsons = (JSONArray) ((JSONObject)jsonObj.get("COOKRCP01")).get("row");
@@ -48,7 +49,7 @@ public class Updater implements Runnable{
     }
 
     private void update(JSONArray recipeJsons) {
-        CustomConnectionDAO<Object> ccdao = new CustomConnectionDAO<>();
+        CustomConnectionDAO ccdao = new CustomConnectionDAO();
         ccdao.initConnection();
 
         for (Object recipeJson : recipeJsons) {
@@ -86,7 +87,11 @@ public class Updater implements Runnable{
     }
 
     public void ingredientsParsing(String data, List<Ingredient> ingredients) {
-        String unitAmount = "[0-9][0-9./~xX]*";
+        if (data.contains("[ 2인분 ] 토마토(2개), ")) {
+            System.out.println();
+        }
+
+        String unitAmount = "[0-9½↉⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛][0-9./~xX]*";
         String specialChars = "[\\(\\)\\[\\]\'\"-<>]";
         String[] units = {"g", "ml", "mg", "cm", "장", "개", "가지", "cc", "인치"};
 
@@ -127,7 +132,7 @@ public class Updater implements Runnable{
         }
     }
 
-    private boolean isDuplication(CustomConnectionDAO<Object> ccdao, Recipe recipe) {
+    private boolean isDuplication(CustomConnectionDAO ccdao, Recipe recipe) {
         return (Boolean) ccdao.execQuery(em -> {
             return 0 < em.createQuery("SELECT r FROM Recipe AS r WHERE r.rcpSeq=:rcp_seq", Recipe.class)
                     .setParameter("rcp_seq", recipe.getRcpSeq())
@@ -135,7 +140,7 @@ public class Updater implements Runnable{
         });
     }
 
-    private void execUpdateQuery(CustomConnectionDAO<Object> ccdao, Recipe recipe, List<Ingredient> ingredients) {
+    private void execUpdateQuery(CustomConnectionDAO ccdao, Recipe recipe, List<Ingredient> ingredients) {
         ccdao.execQuery(em -> {
             em.persist(recipe);
             return null;

@@ -7,7 +7,7 @@ import persistence.dao.Executable;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
-public class CustomConnectionDAO<T> extends DAO<T> implements CustomConnection {
+public class CustomConnectionDAO implements CustomConnection {
     private EntityManager em;
     private EntityTransaction et;
 

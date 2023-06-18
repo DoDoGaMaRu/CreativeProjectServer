@@ -16,7 +16,10 @@ public class _recipe {
     public static Response _getCookable(Request req) {
         return recipeService.cookable(req);
     }
-    public static Response _getNutrient(Request req) {
-        return recipeService.nutrient(req);
+    public static Response _getSemiCookable(Request req) {
+        return recipeService.semiCookable(req);
+    }
+    public static Response _getRecent(Request req) {
+        return recipeService.recent(req);
     }
 }

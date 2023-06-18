@@ -1,17 +1,33 @@
 package network;
 
+import persistence.CEntityManagerFactory;
+
 import java.io.*;
 import java.net.*;
 import java.util.Scanner;
 
-//port : 5000
+
 public class Server {
-    private static final String IP = "127.0.0.1";
+    private static final String IP = "192.168.0.8";
     private static final int PORT = 8080;
     private ServerSocket serverSocket;
 
+    /* TODO 메인으로 이동 */
     public static void main(String... args) {
+        /**
+         *  INIT MODULE
+         *
+         *  CEntityManagerFactory   : create EntityManagerFactory
+         */
+        CEntityManagerFactory.initialization();
+
+        /**
+         * SET SERVER
+         *
+         *
+         */
         Server server = new Server();
+
         server.run();
     }
 

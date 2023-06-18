@@ -13,9 +13,7 @@ public class _refrigerator {
     public static Response _postPutOut(Request req) {
         return refrigeratorService.putOut(req);
     }
-    /*
-    public static Response _getRead(Request req) {
-        return refrigeratorService.read(req);
+    public static Response _getOpen(Request req) {
+        return refrigeratorService.open(req);
     }
-    */
 }

@@ -112,7 +112,9 @@ class ClientThread extends Thread {
             if (c.getName().equals(className)) {
                 for (Method m : c.getMethods()) {
                     if (m.getName().equals(methodName)) {
-                        return (Response) m.invoke(null, req);
+                        Response res = (Response) m.invoke(null, req);
+                        System.out.printf("[REQ] status: %d info: %s-%s_%s\n", res.getStatus(), codeL1Name, typeName, codeL2Name);
+                        return res;
                     }
                 }
             }

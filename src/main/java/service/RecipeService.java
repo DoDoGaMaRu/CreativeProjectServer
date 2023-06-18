@@ -3,23 +3,24 @@ package service;
 import network.protocol.Request;
 import network.protocol.Response;
 import network.protocol.ResponseState;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import persistence.dao.RcpPartDAO;
-import persistence.dao.RecipeDAO;
-import persistence.dao.RefrigeratorDAO;
-import persistence.dao.UserDAO;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import persistence.dao.*;
+import persistence.entity.Cooked;
 import persistence.entity.RcpPart;
 import persistence.entity.Recipe;
 import persistence.entity.Refrigerator;
-import persistence.entity.User;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class RecipeService {
-    private static RecipeDAO recipeDAO = new RecipeDAO();
-
-    //TODO COOKIE 생성
+    private final RecipeDAO recipeDAO = RecipeDAO.getInstance();
+    private final RcpPartDAO rcpPartDAO = RcpPartDAO.getInstance();
+    private final RefrigeratorDAO refrigeratorDAO = RefrigeratorDAO.getInstance();
+    private final UserDAO userDAO = UserDAO.getInstance();
+    private final CookedDAO cookedDAO = CookedDAO.getInstance();
 
     public Response info(Request req) {
 
@@ -27,61 +28,139 @@ public class RecipeService {
     }
 
     public Response exprtDate(Request req) {
+        JSONObject resBody = new JSONObject();
+        JSONParser jsonParser = new JSONParser();
 
-        return Response.builder().build();
+        Long userSerial = (Long) req.getCookie().get("serial");
+
+        List<Refrigerator> refrigerators = refrigeratorDAO.ascFindAllBy("user", userDAO.findByKey(userSerial), 0, 5);
+        List<Recipe> recipes = recipeDAO.semiCookable(userSerial);
+
+        JSONArray recipeJsons = new JSONArray();
+        try {
+            for (Refrigerator ref : refrigerators) {
+                for (Recipe rcp : recipes) {
+                    List<RcpPart> rcpParts = rcpPartDAO.findAllBy("recipe", rcp);
+                    boolean haveIng = false;
+                    for (RcpPart rcpPart : rcpParts) {
+                        if (rcpPart.getIngredient().getId().equals(ref.getIngredient().getId())) {
+                            haveIng = true;
+                            break;
+                        }
+                    }
+
+                    if (haveIng) {
+                        String jsonString = (rcp).getRcpJson();
+                        JSONObject rcpJson = (JSONObject) jsonParser.parse(jsonString);
+
+                        boolean isDuplicate = false;
+                        String rcpSeq = (String) rcpJson.get("RCP_SEQ");
+                        for (Object jo : recipeJsons) {
+                            String curRcpSeq = (String) ((JSONObject)jo).get("RCP_SEQ");
+                            if (rcpSeq.equals(curRcpSeq)) {
+                                isDuplicate = true;
+                            }
+                        }
+                        if (!isDuplicate) {
+                            recipeJsons.add(rcpJson);
+                        }
+                    }
+                }
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        resBody.put("recipes", recipeJsons);
+        return Response.builder()
+                .status(ResponseState.SUCCESS)
+                .body(resBody)
+                .build();
     }
 
     public Response cookable(Request req) {
-        RefrigeratorDAO refrigeratorDAO = new RefrigeratorDAO();
-        RcpPartDAO rcpPartDAO = new RcpPartDAO();
-        RecipeDAO recipeDAO = new RecipeDAO();
+        JSONObject resBody = new JSONObject();
+        JSONParser jsonParser = new JSONParser();
 
-        JSONObject json = new JSONObject();
+        Long userSerial = (Long) req.getCookie().get("serial");
 
-        // 쿠키 정보안에 있는 PK?, ID? 일단 PK라 생각하고 작성 함 + 내 내장고를 들고 옴
-        String serial = req.getCookie().get("SERIAL").toString();
-        List<Refrigerator> myRefrigerator = refrigeratorDAO.selectAllBySerial(Long.parseLong(serial));
+        List<Recipe> recipes = recipeDAO.cookable(userSerial);
 
-        // 내 내장고에서 가지고 있는 재료 아이디 추출
-        List<Long> ingredientIds = new ArrayList<>();
-        for (Refrigerator refrigerator : myRefrigerator) {
-            ingredientIds.add(refrigerator.getIngredient().getId());
+        JSONArray recipeJsons = new JSONArray();
+        try {
+            for (Object recipe : recipes) {
+                String jsonString = ((Recipe) recipe).getRcpJson();
+                recipeJsons.add(jsonParser.parse(jsonString));
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
 
-        List<Recipe> recipes = new ArrayList<>();
+        resBody.put("recipes", recipeJsons);
+        return Response.builder()
+                .status(ResponseState.SUCCESS)
+                .body(resBody)
+                .build();
+    }
 
-        // 하나의 레시피에 들어 있는 모든 재료를 통해 냉장고에 있는 재료랑 비교
-        Long cnt = rcpPartDAO.count();
-        for(Long i = 1L; i <= cnt; i++) {
-            List<RcpPart> rcpIngredients = rcpPartDAO.selectAllByRcpId(i);
+    public Response semiCookable(Request req) {
+        JSONObject resBody = new JSONObject();
+        JSONParser jsonParser = new JSONParser();
 
-            if(ingredientIds.size() < rcpIngredients.size()) {
-                continue;
+        Long userSerial = (Long) req.getCookie().get("serial");
+
+        List<Recipe> recipes = recipeDAO.semiCookable(userSerial);
+
+        JSONArray recipeJsons = new JSONArray();
+        try {
+            for (Object recipe : recipes) {
+                String jsonString = ((Recipe) recipe).getRcpJson();
+                recipeJsons.add(jsonParser.parse(jsonString));
             }
-            else {
-                boolean pass = true;
-                for(Long j = 1L; j <= rcpIngredients.size(); j++) {
-                    if(!ingredientIds.contains(j)) {
-                        pass = false;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        resBody.put("recipes", recipeJsons);
+        return Response.builder()
+                .status(ResponseState.SUCCESS)
+                .body(resBody)
+                .build();
+    }
+
+    public Response recent(Request req) {
+        JSONObject resBody = new JSONObject();
+        JSONParser jsonParser = new JSONParser();
+
+        Long userSerial = (Long) req.getCookie().get("serial");
+
+        List<Recipe> recipes = recipeDAO.semiCookable(userSerial);
+        List<Cooked> cookedRecipes = cookedDAO.recentFindAllBy(userSerial);
+
+
+        JSONArray recipeJsons = new JSONArray();
+        try {
+            for (Recipe recipe : recipes) {
+                boolean unCooked = true;
+
+                for(Cooked cookedRecipe : cookedRecipes) {
+                    if(recipe.getId().equals(cookedRecipe.getRecipe().getId())) {
+                        unCooked = false;
                         break;
                     }
                 }
-                if(pass) {
-                    recipes.add(recipeDAO.selectById(i));
+                if (unCooked) {
+                    recipeJsons.add(jsonParser.parse(recipe.getRcpJson()));
                 }
             }
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
 
-        json.put("recipes", recipes);
-
-        return Response.builder().
-                status(ResponseState.SUCCESS).
-                body(json).
-                build();
-    }
-
-    public Response nutrient(Request req) {
-
-        return Response.builder().build();
+        resBody.put("recipes", recipeJsons);
+        return Response.builder()
+                .status(ResponseState.SUCCESS)
+                .body(resBody)
+                .build();
     }
 }

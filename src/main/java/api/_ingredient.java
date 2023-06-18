@@ -10,4 +10,7 @@ public class _ingredient {
     public static Response _getSearch(Request req) {
         return ingredientService.search(req);
     }
+    public static Response _getCoincide(Request req) {
+        return ingredientService.coincide(req);
+    }
 }
