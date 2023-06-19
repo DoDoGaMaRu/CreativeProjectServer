@@ -1,37 +1,52 @@
 package persistence.dao;
 
 import persistence.entity.*;
-import javax.persistence.*;
-import java.util.*;
 
-public class RecipeDAO extends DAO<Recipe>{
-    public Recipe insert(Recipe rcp) {
-        return (Recipe) execQuery(em -> {
-            em.persist(rcp);
-            return rcp;
-        });
+import javax.persistence.Query;
+import java.util.ArrayList;
+import java.util.List;
+
+public class RecipeDAO extends DAO<Recipe, Long>{
+    private static RecipeDAO recipeDAO;
+
+    public static RecipeDAO getInstance() {
+        if (recipeDAO == null) {
+            recipeDAO = new RecipeDAO();
+        }
+        return recipeDAO;
     }
 
-    public Recipe selectById(Long id) {
-        return (Recipe) execQuery(em -> em.find(Recipe.class, id));
+    private RecipeDAO() {
+        super(Recipe.class);
     }
 
-    public List<Recipe> selectAll() {
+    public List<Recipe> cookable(Long user_serial) {
         return (List<Recipe>) execQuery(em -> {
-            Query query = em.createQuery("SELECT r FROM Recipe r");
+            Query query = em.createQuery("SELECT DISTINCT rp.recipe " +
+                    "FROM RcpPart rp " +
+                    "JOIN Refrigerator r ON rp.ingredient.id = r.ingredient.id " +
+                    "WHERE r.user.serial = :user_serial " +
+                    "GROUP BY rp.recipe.id " +
+                    "HAVING COUNT(DISTINCT rp.ingredient.id) = ( " +
+                    "    SELECT COUNT(rp2) FROM RcpPart rp2 WHERE rp2.recipe.id = rp.recipe.id " +
+                    ")"
+            );
+            query.setParameter("user_serial", user_serial);
             return query.getResultList();
         });
     }
 
-    public void delete(Long id) {
-        execQuery(em -> {
-            Recipe target =  em.find(Recipe.class, id);
-            em.remove(target);
-            return null;
+    public List<Recipe> semiCookable(Long user_serial) {
+        return (List<Recipe>) execQuery(em -> {
+            Query query = em.createQuery("SELECT DISTINCT rp.recipe " +
+                    "FROM RcpPart rp " +
+                    "JOIN Refrigerator r ON rp.ingredient.id = r.ingredient.id " +
+                    "WHERE r.user.serial = :user_serial " +
+                    "GROUP BY rp.recipe.id " +
+                    "HAVING (COUNT(DISTINCT rp.ingredient.id) / (SELECT COUNT(rp2) FROM RcpPart rp2 WHERE rp2.recipe.id = rp.recipe.id)) > 0.5"
+            );
+            query.setParameter("user_serial", user_serial);
+            return query.getResultList();
         });
-    }
-
-    public Recipe update(Recipe rcp) {
-        return (Recipe) execQuery(em -> em.merge(rcp));
     }
 }
